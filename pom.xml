@@ -8,13 +8,37 @@
     <artifactId>azure-bom</artifactId>
     <version>0.1.0.BUILD-SNAPSHOT</version>
     <packaging>pom</packaging>
+
     <name>Azure SDK dependencies BOM</name>
     <description>BOM for Azure SDK dependencies</description>
+    <url>https://github.com/VSChina/azure-bom</url>
 
     <organization>
         <name>Microsoft</name>
         <url>https://www.microsoft.com</url>
     </organization>
+
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>https://github.com/VSChina/azure-bom/blob/master/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>incarnation-p-lee</id>
+            <name>Pan Li</name>
+            <email>panli@microsoft.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com:VSChina/azure-bom.git</connection>
+        <developerConnection>scm:git:ssh://github.com:VSChina/azure-bom.git</developerConnection>
+        <url>https://github.com/VSChina/azure-bom/tree/master</url>
+    </scm>
 
     <!-- Azure SDK Version Properties -->
     <properties>
