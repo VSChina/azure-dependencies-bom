@@ -5,13 +5,13 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure</groupId>
-    <artifactId>azure-bom</artifactId>
+    <artifactId>azure-dependencies-bom</artifactId>
     <version>0.1.0.BUILD-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Azure SDK dependencies BOM</name>
     <description>BOM for Azure SDK dependencies</description>
-    <url>https://github.com/VSChina/azure-bom</url>
+    <url>https://github.com/VSChina/azure-dependencies-bom</url>
 
     <organization>
         <name>Microsoft</name>
@@ -21,7 +21,7 @@
     <licenses>
         <license>
             <name>MIT</name>
-            <url>https://github.com/VSChina/azure-bom/blob/master/LICENSE</url>
+            <url>https://github.com/VSChina/azure-dependencies-bom/blob/master/LICENSE</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
@@ -35,9 +35,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com:VSChina/azure-bom.git</connection>
-        <developerConnection>scm:git:ssh://github.com:VSChina/azure-bom.git</developerConnection>
-        <url>https://github.com/VSChina/azure-bom/tree/master</url>
+        <connection>scm:git:git://github.com:VSChina/azure-dependencies-bom.git</connection>
+        <developerConnection>scm:git:ssh://github.com:VSChina/azure-dependencies-bom.git</developerConnection>
+        <url>https://github.com/VSChina/azure-dependencies-bom/tree/master</url>
     </scm>
 
     <!-- Azure SDK Version Properties -->
