@@ -5,16 +5,40 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure</groupId>
-    <artifactId>azure-bom</artifactId>
-    <version>1.0.0.M2.BUILD-SNAPSHOT</version>
+    <artifactId>azure-dependencies-bom</artifactId>
+    <version>1.0.1.BUILD-SNAPSHOT</version>
     <packaging>pom</packaging>
+
     <name>Azure SDK dependencies BOM</name>
     <description>BOM for Azure SDK dependencies</description>
+    <url>https://github.com/VSChina/azure-dependencies-bom</url>
 
     <organization>
         <name>Microsoft</name>
         <url>https://www.microsoft.com</url>
     </organization>
+
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>https://github.com/VSChina/azure-dependencies-bom/blob/master/LICENSE</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>incarnation-p-lee</id>
+            <name>Pan Li</name>
+            <email>panli@microsoft.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git://github.com:VSChina/azure-dependencies-bom.git</connection>
+        <developerConnection>scm:git:ssh://github.com:VSChina/azure-dependencies-bom.git</developerConnection>
+        <url>https://github.com/VSChina/azure-dependencies-bom/tree/master</url>
+    </scm>
 
     <!-- Azure SDK Version Properties -->
     <properties>
