@@ -42,12 +42,12 @@
 
     <!-- Azure SDK Version Properties -->
     <properties>
-        <azure.sdk.version>1.8.0</azure.sdk.version>
+        <azure.sdk.version>1.14.0</azure.sdk.version>
         <azure.adal4j.version>1.3.0</azure.adal4j.version>
         <azure.applicationinsights.version>2.0.1</azure.applicationinsights.version>
         <azure.eventhub.eph.version>1.0.0</azure.eventhub.eph.version>
         <azure.servicebus.version>1.2.5</azure.servicebus.version>
-        <azure.client.runtime.version>1.3.1</azure.client.runtime.version>
+        <azure.client.runtime.version>1.6.0</azure.client.runtime.version>
         <azure.storage.version>5.5.0</azure.storage.version>
         <azure.documentdb.version>1.16.2</azure.documentdb.version>
         <azure.keyvault.version>1.0.0</azure.keyvault.version>
