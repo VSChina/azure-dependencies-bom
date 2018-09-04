@@ -1,0 +1,8 @@
+language: java
+jdk:
+  - oraclejdk8
+
+script:
+  - set -o pipefail
+  - cd verification && mvn clean package && cd -
+
