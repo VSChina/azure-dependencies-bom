@@ -1,4 +1,4 @@
-package com.microsoft.azure.verification.domain;
+package com.microsoft.azure.verification.cosmosdb.domain;
 
 import com.microsoft.azure.spring.data.cosmosdb.core.mapping.Document;
 import lombok.Data;

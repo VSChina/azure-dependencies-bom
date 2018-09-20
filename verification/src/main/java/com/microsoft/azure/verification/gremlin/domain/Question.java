@@ -3,7 +3,7 @@
  * Licensed under the MIT License. See LICENSE in the project root for
  * license information.
  */
-package com.microsoft.azure.verification.domain;
+package com.microsoft.azure.verification.gremlin.domain;
 
 import com.microsoft.spring.data.gremlin.annotation.Vertex;
 import lombok.Data;
