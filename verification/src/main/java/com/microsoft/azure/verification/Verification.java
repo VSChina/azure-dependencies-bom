@@ -36,12 +36,11 @@ import com.microsoft.rest.RestClient;
 import com.microsoft.rest.ServiceResponseBuilder;
 import com.microsoft.rest.credentials.ServiceClientCredentials;
 import com.microsoft.rest.serializer.JacksonAdapter;
+import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.services.media.MediaConfiguration;
 import com.microsoft.windowsazure.services.media.MediaContract;
 import com.microsoft.windowsazure.services.media.MediaService;
-import com.microsoft.windowsazure.services.media.authentication.AzureAdTokenCredentials;
-import com.microsoft.windowsazure.services.media.authentication.AzureAdTokenProvider;
-import com.microsoft.windowsazure.services.media.authentication.TokenProvider;
+import com.microsoft.windowsazure.services.media.authentication.*;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,15 +49,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-
-import static com.microsoft.windowsazure.Configuration.*;
 
 @RestController
 public class Verification {
@@ -179,20 +174,15 @@ public class Verification {
 
     @Bean
     public MediaContract createMediaContract() throws MalformedURLException {
-        final com.microsoft.windowsazure.services.media.authentication.AzureEnvironment mediaAzureEnv =
-                new com.microsoft.windowsazure.services.media.authentication.AzureEnvironment(
-                        URI.create("http://fake.aad.uri"), "fake-media-resource",
-                        "fake-media-sdk-clientid", URI.create("http://fake.media.redirect.uri")
-                );
-        final AzureAdTokenCredentials tokenCredentials = new AzureAdTokenCredentials("fake-tenant", mediaAzureEnv);
-        final ExecutorService executorService = new ScheduledThreadPoolExecutor(1);
+        final AzureAdTokenCredentials tokenCredentials = new AzureAdTokenCredentials("fake-tenant",
+                new AzureAdClientSymmetricKey("fake-client-id", "fake-client-key"),
+                AzureEnvironments.AZURE_CLOUD_ENVIRONMENT);
+        final ExecutorService executorService = Executors.newFixedThreadPool(1);
         final TokenProvider tokenProvider = new AzureAdTokenProvider(tokenCredentials, executorService);
-        final com.microsoft.windowsazure.Configuration configuration = MediaConfiguration
-                .configureWithAzureAdTokenProvider(URI.create("http://fake.uri"), tokenProvider);
+        final Configuration configuration = Configuration.getInstance();
 
-        configuration.getProperties().put(PROPERTY_HTTP_PROXY_HOST, "");
-        configuration.getProperties().put(PROPERTY_HTTP_PROXY_PORT, "");
-        configuration.getProperties().put(PROPERTY_HTTP_PROXY_SCHEME, "");
+        configuration.setProperty(MediaConfiguration.AZURE_AD_API_SERVER, "http://fake.account.api.url");
+        configuration.setProperty(MediaConfiguration.AZURE_AD_TOKEN_PROVIDER, tokenProvider);
 
         return MediaService.create(configuration);
     }
