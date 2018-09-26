@@ -23,6 +23,7 @@ import com.microsoft.azure.keyvault.authentication.KeyVaultCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.keyvault.Vault;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
+import com.microsoft.azure.serializer.AzureJacksonAdapter;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.ReceiveMode;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
@@ -30,45 +31,44 @@ import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
-import com.microsoft.azure.verification.repository.UserRepository;
+import com.microsoft.azure.verification.cosmosdb.repository.UserRepository;
 import com.microsoft.rest.RestClient;
 import com.microsoft.rest.ServiceResponseBuilder;
 import com.microsoft.rest.credentials.ServiceClientCredentials;
 import com.microsoft.rest.serializer.JacksonAdapter;
+import com.microsoft.windowsazure.Configuration;
 import com.microsoft.windowsazure.services.media.MediaConfiguration;
 import com.microsoft.windowsazure.services.media.MediaContract;
 import com.microsoft.windowsazure.services.media.MediaService;
+import com.microsoft.windowsazure.services.media.authentication.*;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
-import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static com.microsoft.windowsazure.Configuration.*;
-
 @RestController
 public class Verification {
+    @Value("${azure.management.baseUrl}")
+    private String managementBaseUrl;
 
     @Autowired
     private UserRepository userRepository;
 
     @Bean
-    public UserRepository getUserRepository() {
-        return this.userRepository;
-    }
-
-    @Bean
     public Azure getAzure() throws IOException {
         RestClient restClient = new RestClient.Builder()
-                .withBaseUrl(new AzureEnvironment(new HashMap<>()), AzureEnvironment.Endpoint.RESOURCE_MANAGER)
+                .withBaseUrl(managementBaseUrl)
                 .withResponseBuilderFactory(new AzureResponseBuilder.Factory())
+                .withSerializerAdapter(new AzureJacksonAdapter())
                 .build();
 
         return Azure.authenticate(restClient, "Fake-domain").withDefaultSubscription();
@@ -173,13 +173,16 @@ public class Verification {
     }
 
     @Bean
-    public MediaContract createMediaContract() {
-        final com.microsoft.windowsazure.Configuration configuration = MediaConfiguration
-                .configureWithOAuthAuthentication("", "", "", "", "");
+    public MediaContract createMediaContract() throws MalformedURLException {
+        final AzureAdTokenCredentials tokenCredentials = new AzureAdTokenCredentials("fake-tenant",
+                new AzureAdClientSymmetricKey("fake-client-id", "fake-client-key"),
+                AzureEnvironments.AZURE_CLOUD_ENVIRONMENT);
+        final ExecutorService executorService = Executors.newFixedThreadPool(1);
+        final TokenProvider tokenProvider = new AzureAdTokenProvider(tokenCredentials, executorService);
+        final Configuration configuration = Configuration.getInstance();
 
-        configuration.getProperties().put(PROPERTY_HTTP_PROXY_HOST, "");
-        configuration.getProperties().put(PROPERTY_HTTP_PROXY_PORT, "");
-        configuration.getProperties().put(PROPERTY_HTTP_PROXY_SCHEME, "");
+        configuration.setProperty(MediaConfiguration.AZURE_AD_API_SERVER, "http://fake.account.api.url");
+        configuration.setProperty(MediaConfiguration.AZURE_AD_TOKEN_PROVIDER, tokenProvider);
 
         return MediaService.create(configuration);
     }

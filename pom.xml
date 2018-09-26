@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure</groupId>
     <artifactId>azure-dependencies-bom</artifactId>
-    <version>1.0.1.BUILD-SNAPSHOT</version>
+    <version>1.0.2.BUILD-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Azure SDK dependencies BOM</name>
@@ -51,7 +51,7 @@
         <azure.storage.version>5.5.0</azure.storage.version>
         <azure.documentdb.version>1.16.2</azure.documentdb.version>
         <azure.keyvault.version>1.0.0</azure.keyvault.version>
-        <azure.media.version>0.9.7</azure.media.version>
+        <azure.media.version>0.9.8</azure.media.version>
         <azure.client.authentication.version>1.6.1</azure.client.authentication.version>
         <spring.data.cosmosdb.version>2.0.5</spring.data.cosmosdb.version>
         <spring.data.gremlin.version>2.0.0</spring.data.gremlin.version>
