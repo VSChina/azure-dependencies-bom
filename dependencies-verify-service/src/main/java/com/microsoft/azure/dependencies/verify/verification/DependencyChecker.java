@@ -1,63 +1,258 @@
 package com.microsoft.azure.dependencies.verify.verification;
 
-import com.microsoft.azure.dependencies.verify.exception.VerificationHttpException;
-import com.microsoft.azure.dependencies.verify.pom.SimpleMavenPom;
+import com.microsoft.azure.dependencies.verify.exception.VerificationResolveException;
+import com.microsoft.azure.dependencies.verify.pom.ModelResolver;
+import com.microsoft.azure.dependencies.verify.pom.Project;
+import com.microsoft.azure.dependencies.verify.pom.SimplePom;
 import lombok.NonNull;
-import lombok.SneakyThrows;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 public class DependencyChecker {
 
-    private static final String MAVEN_URL_PATTERN = "https://repo1.maven.org/maven2/%s/%s/%s/%s";
+    private final SimplePom pom;
 
-    private final SimpleMavenPom pom;
+    private final List<CheckResult> checkResults = new ArrayList<>();
 
-    private final HttpClient httpClient;
+    private final ModelResolver resolver = new ModelResolver();
 
-    public DependencyChecker(@NonNull SimpleMavenPom pom) {
-        this.pom = pom;
-        this.httpClient = HttpClientBuilder.create().build();
+    public DependencyChecker(@NonNull Project project) {
+        this.pom = SimplePom.fromProject(project);
     }
 
-    public boolean check() {
-        HttpResponse response = getMavenPomResponse(this.pom);
-        MavenXpp3Reader reader = new MavenXpp3Reader();
-
-        Model model = reader.read(new InputStreamReader(response.getEntity().getContent()));
-
-        return true;
+    private boolean dependencyMatches(@NonNull Dependency target, @NonNull Dependency reference) {
+        if (!target.getGroupId().equals(reference.getGroupId())) {
+            return false;
+        } else if (!target.getArtifactId().equals(reference.getArtifactId())) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
-    private static String getMavenPomUrl(@NonNull SimpleMavenPom pom) {
-        String groupId = pom.getGroupId().replaceAll("\\.", "/");
-        String artifactId = pom.getArtifactId();
-        String version = pom.getVersion();
-        String filename = String.format("%s-%s.pom", artifactId, version);
-
-        return String.format(MAVEN_URL_PATTERN, groupId, artifactId, version, filename);
+    private String getPropertyName(@NonNull String placeHolder) {
+        return placeHolder.replace("${", "").replace("}", "");
     }
 
-    private HttpResponse getMavenPomResponse(@NonNull SimpleMavenPom pom) {
-        String url = getMavenPomUrl(pom);
-        HttpGet request = new HttpGet(url);
-        HttpResponse response;
+    private boolean isPlaceHolderProperty(@NonNull String value) {
+        return value.startsWith("${") && value.endsWith("}");
+    }
 
-        try {
-            response = httpClient.execute(request);
-        } catch (IOException e) {
-            throw new VerificationHttpException("Failed to execute http request.", e);
+    private void resolveDependencyParentVersion(@NonNull Dependency dependency, @NonNull Model model) {
+        Model parentModel = this.resolver.resolve(SimplePom.fromParent(model.getParent()));
+        Optional<Dependency> optional = parentModel.getDependencies().stream()
+                .filter(d -> dependencyMatches(d, dependency)).findFirst();
+
+        if (optional.isPresent() && optional.get().getVersion() != null) {
+            dependency.setVersion(resolveProperty(optional.get().getVersion(), model));
+        } else {
+            resolveDependency(dependency, parentModel);
+        }
+    }
+
+    private void resolveDependencyManagementVersion(@NonNull Dependency dependency, @NonNull Model model) {
+        for (Dependency d : model.getDependencyManagement().getDependencies()) {
+            if ("import".equals(d.getScope()) && "pom".equals(d.getType())) {
+                resolveDependency(d, model);
+
+                Model dependMode = this.resolver.resolve(SimplePom.fromDependency(d));
+                Optional<Dependency> optional = dependMode.getDependencyManagement().getDependencies().stream()
+                        .filter(p -> dependencyMatches(p, dependency)).findFirst();
+
+                if (optional.isPresent()) {
+                    dependency.setVersion(resolveProperty(optional.get().getVersion(), dependMode));
+                    return;
+//                } else {
+//                    resolveDependencyVersion(dependency, dependMode);
+                }
+            } else if (dependencyMatches(dependency, d)) {
+                dependency.setVersion(resolveProperty(d.getVersion(), model));
+                return;
+            }
+        }
+    }
+
+    private boolean isDependencyResolved(@NonNull Dependency dependency) {
+        if (isPlaceHolderProperty(dependency.getGroupId()) || isPlaceHolderProperty(dependency.getGroupId())) {
+            return false;
+        } else if (dependency.getVersion() == null) {
+            return false;
+        } else {
+            return !isPlaceHolderProperty(dependency.getVersion());
+        }
+    }
+
+    private String resolveProjectGroupId(@NonNull Model model) {
+        String groupId = model.getGroupId();
+
+        if (StringUtils.hasText(groupId)) {
+            return groupId;
+        } else {
+            return model.getParent().getGroupId();
+        }
+    }
+
+    private String resolveProjectVersion(@NonNull Model model) {
+        String version = model.getVersion();
+
+        if (StringUtils.hasText(version)) {
+            return version;
+        } else {
+            return model.getParent().getVersion();
+        }
+    }
+
+    private String resolveProperty(@NonNull String property, @NonNull Model model) {
+        if (!isPlaceHolderProperty(property)) {
+            return property;
         }
 
-        return response;
+        Model currentModel = model;
+        String name = getPropertyName(property);
+
+        while (true) {
+            Properties properties = currentModel.getProperties();
+
+            if (properties.containsKey(name)) {
+                return properties.getProperty(name);
+            } else if (currentModel.getParent() != null) {
+                currentModel = this.resolver.resolve(SimplePom.fromParent(currentModel.getParent()));
+            } else if (name.equals("project.version")) {
+                return resolveProjectVersion(model);
+            } else if (name.equals("project.groupId")) {
+                return resolveProjectGroupId(model);
+            } else {
+                break;
+            }
+        }
+
+        throw new VerificationResolveException("Failed to resolve property: " + property);
+    }
+
+    private void resolveDependencyProperties(@NonNull Dependency dependency, @NonNull Model model) {
+        if (isDependencyResolved(dependency)) {
+            return;
+        }
+
+        String groupId = dependency.getGroupId();
+        String artifactId = dependency.getArtifactId();
+        String version = dependency.getVersion();
+
+        if (isPlaceHolderProperty(groupId)) {
+            dependency.setGroupId(resolveProperty(groupId, model));
+        }
+
+        if (isPlaceHolderProperty(artifactId)) {
+            dependency.setArtifactId(resolveProperty(artifactId, model));
+        }
+
+        if (version != null && isPlaceHolderProperty(version)) {
+            dependency.setVersion(resolveProperty(version, model));
+        }
+    }
+
+    private void resolveDependencyVersion(@NonNull Dependency dependency, @NonNull Model model) {
+        if (isDependencyResolved(dependency)) {
+            return;
+        }
+
+        if (model.getDependencyManagement() != null) {
+            resolveDependencyManagementVersion(dependency, model);
+        }
+
+        if (model.getParent() != null && !isDependencyResolved(dependency)) {
+            resolveDependencyParentVersion(dependency, model);
+        }
+    }
+
+    private void resolveDependency(@NonNull Dependency dependency, @NonNull Model model) {
+        if (isDependencyResolved(dependency)) {
+            return;
+        }
+
+        resolveDependencyProperties(dependency, model);
+        resolveDependencyVersion(dependency, model);
+
+        Assert.isTrue(isDependencyResolved(dependency), "dependency should be resolved.");
+    }
+
+    private boolean isCompileScope(@NonNull Dependency dependency, final int level) {
+        boolean isCompile = dependency.getScope() == null || dependency.getScope().equals("compile");
+
+        if (isCompile && "true".equals(dependency.getOptional()) && level > 0) {
+            return false;
+        } else {
+            return isCompile;
+        }
+    }
+
+    private List<SimplePom> buildDependencyPoms(@NonNull SimplePom simplePom, @NonNull Map<String, SimplePom> pomsMap,
+                                                final int level) {
+        List<SimplePom> poms = new ArrayList<>();
+        Model model = this.resolver.resolve(simplePom);
+
+        model.getDependencies().stream().filter(d -> isCompileScope(d, level)).forEach(d -> {
+            resolveDependency(d, model);
+
+            SimplePom pom = SimplePom.fromDependency(d);
+
+            pomsMap.compute(pom.signature(), (s, p) -> {
+                if (p == null) {
+                    poms.add(pom);
+                    return pom;
+                } else if (p.getVersion().equals(pom.getVersion())) {
+                    return p;
+                } else {
+                    this.checkResults.add(CheckResult.from(p, pom.getVersion()));
+                    poms.add(p);
+                    return p;
+                }
+            });
+        });
+
+        simplePom.getDependencies().addAll(poms);
+
+        return poms;
+    }
+
+    private List<SimplePom> buildDependencyTreeLevel(@NonNull List<SimplePom> poms,
+                                                     @NonNull Map<String, SimplePom> pomsMap,
+                                                     final int level) {
+        log.info("== Build Dependency Tree Level [{}] ==", level);
+
+        List<SimplePom> simplePoms = poms.stream()
+                .map(p -> buildDependencyPoms(p, pomsMap, level))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+
+        LinkedHashSet<SimplePom> set = new LinkedHashSet<>(simplePoms.size());
+
+        set.addAll(simplePoms);
+
+        return new ArrayList<>(set);
+    }
+
+    private void buildDependencyTree(@NonNull Map<String, SimplePom> pomsMap) {
+        int level = 0;
+        List<SimplePom> poms = Collections.singletonList(this.pom);
+
+        while (!poms.isEmpty()) {
+            poms = buildDependencyTreeLevel(poms, pomsMap, level++);
+        }
+    }
+
+    public List<CheckResult> check() {
+        this.checkResults.clear();
+
+        buildDependencyTree(new HashMap<>());
+
+        return this.checkResults;
     }
 }

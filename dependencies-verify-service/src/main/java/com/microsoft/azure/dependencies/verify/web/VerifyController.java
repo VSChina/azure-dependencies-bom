@@ -1,31 +1,30 @@
 package com.microsoft.azure.dependencies.verify.web;
 
-import com.microsoft.azure.dependencies.verify.pom.SimpleMavenPom;
+import com.microsoft.azure.dependencies.verify.pom.Project;
+import com.microsoft.azure.dependencies.verify.verification.CheckResult;
 import com.microsoft.azure.dependencies.verify.verification.DependencyChecker;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class VerifyController {
 
+    private static final String JSON_SAMPLE = String.join(System.getProperty("line.separator"),
+            "Post Json sample:",
+            "{",
+            "    \"groupId\": \"com.microsoft.azure\",",
+            "    \"artifactId\": \"spring-data-cosmosdb\",",
+            "    \"version\": \"2.0.5\"",
+            "}");
+
     @GetMapping("/greeting")
     public String greeting() {
-        return "Greetings!";
+        return JSON_SAMPLE;
     }
 
     @PostMapping("/verify")
-    public String dependenciesVerify() {
-        SimpleMavenPom pom = SimpleMavenPom.builder()
-                .groupId("com.microsoft.azure")
-                .artifactId("spring-data-cosmosdb")
-                .version("2.0.5")
-                .build();
-
-        DependencyChecker checker = new DependencyChecker(pom);
-
-        checker.check();
-
-        return "Verify Success!";
+    public List<CheckResult> dependenciesVerify(@RequestBody Project project) {
+        return new DependencyChecker(project).check();
     }
 }
