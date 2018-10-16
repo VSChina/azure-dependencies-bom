@@ -1,5 +1,6 @@
 package com.microsoft.azure.dependencies.verify.verification;
 
+import com.microsoft.azure.dependencies.verify.common.Utils;
 import com.microsoft.azure.dependencies.verify.exception.VerificationResolveException;
 import com.microsoft.azure.dependencies.verify.pom.ModelResolver;
 import com.microsoft.azure.dependencies.verify.pom.Project;
@@ -53,14 +54,14 @@ public class DependencyChecker {
         if (optional.isPresent() && optional.get().getVersion() != null) {
             dependency.setVersion(resolveProperty(optional.get().getVersion(), model));
         } else {
-            resolveDependency(dependency, parentModel);
+            resolveDependencyInternal(dependency, parentModel);
         }
     }
 
     private void resolveDependencyManagementVersion(@NonNull Dependency dependency, @NonNull Model model) {
         for (Dependency d : model.getDependencyManagement().getDependencies()) {
             if ("import".equals(d.getScope()) && "pom".equals(d.getType())) {
-                resolveDependency(d, model);
+                resolveDependencyInternal(d, model);
 
                 Model dependMode = this.resolver.resolve(SimplePom.fromDependency(d));
                 Optional<Dependency> optional = dependMode.getDependencyManagement().getDependencies().stream()
@@ -68,12 +69,14 @@ public class DependencyChecker {
 
                 if (optional.isPresent()) {
                     dependency.setVersion(resolveProperty(optional.get().getVersion(), dependMode));
-                    return;
-//                } else {
-//                    resolveDependencyVersion(dependency, dependMode);
+                } else {
+                    resolveDependencyInternal(dependency, dependMode);
                 }
             } else if (dependencyMatches(dependency, d)) {
                 dependency.setVersion(resolveProperty(d.getVersion(), model));
+            }
+
+            if (isDependencyResolved(dependency)) {
                 return;
             }
         }
@@ -172,15 +175,21 @@ public class DependencyChecker {
         }
     }
 
+    private void resolveDependencyInternal(@NonNull Dependency dependency, @NonNull Model model) {
+        resolveDependencyProperties(dependency, model);
+        resolveDependencyVersion(dependency, model);
+    }
+
     private void resolveDependency(@NonNull Dependency dependency, @NonNull Model model) {
         if (isDependencyResolved(dependency)) {
             return;
         }
 
-        resolveDependencyProperties(dependency, model);
-        resolveDependencyVersion(dependency, model);
+        resolveDependencyInternal(dependency, model);
 
         Assert.isTrue(isDependencyResolved(dependency), "dependency should be resolved.");
+
+        log.debug("resolve dependency {}", dependency.toString());
     }
 
     private boolean isCompileScope(@NonNull Dependency dependency, final int level) {
@@ -198,7 +207,10 @@ public class DependencyChecker {
         List<SimplePom> poms = new ArrayList<>();
         Model model = this.resolver.resolve(simplePom);
 
+        log.debug("build {}", simplePom.toString());
+
         model.getDependencies().stream().filter(d -> isCompileScope(d, level)).forEach(d -> {
+
             resolveDependency(d, model);
 
             SimplePom pom = SimplePom.fromDependency(d);
@@ -232,11 +244,7 @@ public class DependencyChecker {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
 
-        LinkedHashSet<SimplePom> set = new LinkedHashSet<>(simplePoms.size());
-
-        set.addAll(simplePoms);
-
-        return new ArrayList<>(set);
+        return Utils.toDistinctList(simplePoms);
     }
 
     private void buildDependencyTree(@NonNull Map<String, SimplePom> pomsMap) {
