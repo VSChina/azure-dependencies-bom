@@ -31,11 +31,7 @@ public class DependencyChecker {
     private boolean dependencyMatches(@NonNull Dependency target, @NonNull Dependency reference) {
         if (!target.getGroupId().equals(reference.getGroupId())) {
             return false;
-        } else if (!target.getArtifactId().equals(reference.getArtifactId())) {
-            return false;
-        } else {
-            return true;
-        }
+        } else return target.getArtifactId().equals(reference.getArtifactId());
     }
 
     private String getPropertyName(@NonNull String placeHolder) {
@@ -58,6 +54,7 @@ public class DependencyChecker {
         }
     }
 
+    // TODO: Need the handle executed dependency.
     private void resolveDependencyManagementVersion(@NonNull Dependency dependency, @NonNull Model model) {
         for (Dependency d : model.getDependencyManagement().getDependencies()) {
             if ("import".equals(d.getScope()) && "pom".equals(d.getType())) {
@@ -112,6 +109,22 @@ public class DependencyChecker {
         }
     }
 
+    private String resolveRootProperty(@NonNull String name, @NonNull Properties properties) {
+        String value = properties.getProperty(name);
+
+        while (isPlaceHolderProperty(value)) {
+            String nextValue = properties.getProperty(getPropertyName(value));
+
+            if (nextValue == null) {
+                return value;
+            }
+
+            value = nextValue;
+        }
+
+        return value;
+    }
+
     private String resolveProperty(@NonNull String property, @NonNull Model model) {
         if (!isPlaceHolderProperty(property)) {
             return property;
@@ -123,14 +136,24 @@ public class DependencyChecker {
         while (true) {
             Properties properties = currentModel.getProperties();
 
-            if (properties.containsKey(name)) {
-                return properties.getProperty(name);
-            } else if (currentModel.getParent() != null) {
-                currentModel = this.resolver.resolve(SimplePom.fromParent(currentModel.getParent()));
-            } else if (name.equals("project.version")) {
+            if (name.equals("project.version")) {
                 return resolveProjectVersion(model);
             } else if (name.equals("project.groupId")) {
                 return resolveProjectGroupId(model);
+            }
+
+            if (properties.containsKey(name)) {
+                String value = resolveRootProperty(name, properties);
+
+                if (isPlaceHolderProperty(value)) {
+                    name = getPropertyName(value);
+                } else {
+                    return value;
+                }
+            }
+
+            if (currentModel.getParent() != null) {
+                currentModel = this.resolver.resolve(SimplePom.fromParent(currentModel.getParent()));
             } else {
                 break;
             }
@@ -180,16 +203,26 @@ public class DependencyChecker {
         resolveDependencyVersion(dependency, model);
     }
 
+    private boolean isDependencyRangedVersion(@NonNull Dependency dependency) {
+        String version = dependency.getVersion();
+
+        Assert.isTrue(StringUtils.hasText(version), "should contains valid version.");
+
+        if (version.contains(",") || version.contains("]") || version.contains(")")
+                || version.contains(">") || version.contains("<")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private void resolveDependency(@NonNull Dependency dependency, @NonNull Model model) {
-        if (isDependencyResolved(dependency)) {
-            return;
+        if (!isDependencyResolved(dependency)) {
+            resolveDependencyInternal(dependency, model);
         }
 
-        resolveDependencyInternal(dependency, model);
-
+        log.debug("resolve {}", dependency.toString());
         Assert.isTrue(isDependencyResolved(dependency), "dependency should be resolved.");
-
-        log.debug("resolve dependency {}", dependency.toString());
     }
 
     private boolean isCompileScope(@NonNull Dependency dependency, final int level) {
@@ -204,29 +237,30 @@ public class DependencyChecker {
 
     private List<SimplePom> buildDependencyPoms(@NonNull SimplePom simplePom, @NonNull Map<String, SimplePom> pomsMap,
                                                 final int level) {
+        log.debug("build {}", simplePom.toString());
+
         List<SimplePom> poms = new ArrayList<>();
         Model model = this.resolver.resolve(simplePom);
 
-        log.debug("build {}", simplePom.toString());
-
         model.getDependencies().stream().filter(d -> isCompileScope(d, level)).forEach(d -> {
-
             resolveDependency(d, model);
 
-            SimplePom pom = SimplePom.fromDependency(d);
+            if (!isDependencyRangedVersion(d)) { // TODO: need to investigate how maven handle ranged version.
+                SimplePom pom = SimplePom.fromDependency(d);
 
-            pomsMap.compute(pom.signature(), (s, p) -> {
-                if (p == null) {
-                    poms.add(pom);
-                    return pom;
-                } else if (p.getVersion().equals(pom.getVersion())) {
-                    return p;
-                } else {
-                    this.checkResults.add(CheckResult.from(p, pom.getVersion()));
-                    poms.add(p);
-                    return p;
-                }
-            });
+                pomsMap.compute(pom.signature(), (s, p) -> {
+                    if (p == null) {
+                        poms.add(pom);
+                        return pom;
+                    } else if (p.getVersion().equals(pom.getVersion())) {
+                        return p;
+                    } else {
+                        this.checkResults.add(CheckResult.from(p, pom.getVersion()));
+                        poms.add(p);
+                        return p;
+                    }
+                });
+            }
         });
 
         simplePom.getDependencies().addAll(poms);
@@ -251,6 +285,7 @@ public class DependencyChecker {
         int level = 0;
         List<SimplePom> poms = Collections.singletonList(this.pom);
 
+        // TODO: need to add support for dependencyManagement pom.
         while (!poms.isEmpty()) {
             poms = buildDependencyTreeLevel(poms, pomsMap, level++);
         }
@@ -260,6 +295,8 @@ public class DependencyChecker {
         this.checkResults.clear();
 
         buildDependencyTree(new HashMap<>());
+
+        log.info("Dependency check done.");
 
         return this.checkResults;
     }
