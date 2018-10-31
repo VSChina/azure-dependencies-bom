@@ -1,0 +1,3 @@
+logging:
+  level:
+    com.microsoft.azure.dependencies.verify.verification.DependencyChecker: DEBUG
