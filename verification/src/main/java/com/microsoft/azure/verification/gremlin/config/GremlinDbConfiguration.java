@@ -1,6 +1,6 @@
 package com.microsoft.azure.verification.gremlin.config;
 
-import com.microsoft.spring.data.gremlin.common.GremlinConfiguration;
+import com.microsoft.spring.data.gremlin.common.GremlinConfig;
 import com.microsoft.spring.data.gremlin.config.AbstractGremlinConfiguration;
 import com.microsoft.spring.data.gremlin.repository.config.EnableGremlinRepositories;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +13,7 @@ public class GremlinDbConfiguration extends AbstractGremlinConfiguration {
     private String endpoint;
 
     @Value("${gremlin.port}")
-    private String port;
+    private Integer port;
 
     @Value("${gremlin.username}")
     private String username;
@@ -22,13 +22,7 @@ public class GremlinDbConfiguration extends AbstractGremlinConfiguration {
     private String password;
 
     @Override
-    public GremlinConfiguration getGremlinConfiguration() {
-        GremlinConfiguration config = new GremlinConfiguration();
-        config.setEndpoint(endpoint);
-        config.setPort(port);
-        config.setUsername(username);
-        config.setPassword(password);
-
-        return config;
+    public GremlinConfig getGremlinConfig() {
+        return GremlinConfig.builder(endpoint, username, password).port(port).build();
     }
 }
