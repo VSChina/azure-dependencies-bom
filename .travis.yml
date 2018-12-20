@@ -3,6 +3,7 @@ jdk:
   - oraclejdk8
 
 script:
+  - mvn clean install
   - set -o pipefail
   - cd verification && mvn clean package && cd -
 
