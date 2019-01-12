@@ -55,6 +55,8 @@
         <azure.media.version>0.9.8</azure.media.version>
         <azure.client.authentication.version>1.6.1</azure.client.authentication.version>
         <azure.cosmosdb.version>2.2.0</azure.cosmosdb.version>
+        <azuremonitor.micrometer.registry.version>1.1.2</azuremonitor.micrometer.registry.version>
+        <micrometer.core.version>1.1.2</micrometer.core.version>
         <spring.data.cosmosdb.version>2.1.0</spring.data.cosmosdb.version>
         <spring.data.gremlin.version>2.1.0</spring.data.gremlin.version>
     </properties>
