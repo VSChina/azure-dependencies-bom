@@ -55,8 +55,10 @@
         <azure.media.version>0.9.8</azure.media.version>
         <azure.client.authentication.version>1.6.1</azure.client.authentication.version>
         <azure.cosmosdb.version>2.2.0</azure.cosmosdb.version>
+        <azure.monitor.micrometer.registry.version>1.1.1</azure.monitor.micrometer.registry.version>
         <spring.data.cosmosdb.version>2.1.0</spring.data.cosmosdb.version>
         <spring.data.gremlin.version>2.1.0</spring.data.gremlin.version>
+        <micrometer.core.version>1.1.1</micrometer.core.version>
     </properties>
 
     <dependencyManagement>
@@ -164,6 +166,20 @@
                 <groupId>com.microsoft.azure</groupId>
                 <artifactId>azure-client-authentication</artifactId>
                 <version>${azure.client.authentication.version}</version>
+            </dependency>
+
+            <!-- Azure Monitor Micrometer Registry -->
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-registry-azure-monitor</artifactId>
+                <version>${azure.monitor.micrometer.registry.version}</version>
+            </dependency>
+
+            <!-- Micrometer Core -->
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-core</artifactId>
+                <version>${micrometer.core.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
