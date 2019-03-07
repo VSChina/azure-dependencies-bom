@@ -46,7 +46,7 @@
         <azure.adal4j.version>1.6.0</azure.adal4j.version>
         <azure.applicationinsights.version>2.2.0</azure.applicationinsights.version>
         <azure.eventhub.eph.version>1.0.0</azure.eventhub.eph.version>
-        <azure.servicebus.version>1.2.5</azure.servicebus.version>
+        <azure.servicebus.version>1.2.8</azure.servicebus.version>
         <azure.client.runtime.version>1.6.0</azure.client.runtime.version>
         <azure.storage.version>5.5.0</azure.storage.version>
         <azure.storage.blob.version>10.1.0</azure.storage.blob.version>
@@ -56,8 +56,8 @@
         <azure.client.authentication.version>1.6.1</azure.client.authentication.version>
         <azure.cosmosdb.version>2.2.0</azure.cosmosdb.version>
         <azure.monitor.micrometer.registry.version>1.1.1</azure.monitor.micrometer.registry.version>
-        <spring.data.cosmosdb.version>2.1.0</spring.data.cosmosdb.version>
-        <spring.data.gremlin.version>2.1.0</spring.data.gremlin.version>
+        <spring.data.cosmosdb.version>2.1.1</spring.data.cosmosdb.version>
+        <spring.data.gremlin.version>2.1.1</spring.data.gremlin.version>
         <micrometer.core.version>1.1.1</micrometer.core.version>
     </properties>
 
