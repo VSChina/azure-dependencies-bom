@@ -43,7 +43,7 @@
     <!-- Azure SDK Version Properties -->
     <properties>
         <azure.sdk.version>1.14.0</azure.sdk.version>
-        <azure.adal4j.version>1.6.0</azure.adal4j.version>
+        <azure.adal4j.version>1.6.4</azure.adal4j.version>
         <azure.applicationinsights.version>2.2.0</azure.applicationinsights.version>
         <azure.eventhub.eph.version>1.0.0</azure.eventhub.eph.version>
         <azure.servicebus.version>1.2.8</azure.servicebus.version>
