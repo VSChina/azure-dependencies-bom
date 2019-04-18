@@ -49,7 +49,7 @@
         <azure.servicebus.version>1.2.8</azure.servicebus.version>
         <azure.client.runtime.version>1.6.0</azure.client.runtime.version>
         <azure.storage.version>5.5.0</azure.storage.version>
-        <azure.storage.blob.version>10.1.0</azure.storage.blob.version>
+        <azure.storage.blob.version>10.5.0</azure.storage.blob.version>
         <azure.documentdb.version>1.16.2</azure.documentdb.version>
         <azure.keyvault.version>1.0.0</azure.keyvault.version>
         <azure.media.version>0.9.8</azure.media.version>
