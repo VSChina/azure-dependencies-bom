@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure</groupId>
     <artifactId>azure-dependencies-bom</artifactId>
-    <version>2.1.0.M5</version>
+    <version>2.1.0.M6</version>
     <packaging>pom</packaging>
 
     <name>Azure SDK dependencies BOM</name>
@@ -54,10 +54,10 @@
         <azure.keyvault.version>1.0.0</azure.keyvault.version>
         <azure.media.version>0.9.8</azure.media.version>
         <azure.client.authentication.version>1.6.1</azure.client.authentication.version>
-        <azure.cosmosdb.version>2.2.0</azure.cosmosdb.version>
+        <azure.cosmos.version>3.1.0</azure.cosmos.version>
         <azure.monitor.micrometer.registry.version>1.1.1</azure.monitor.micrometer.registry.version>
-        <spring.data.cosmosdb.version>2.1.2</spring.data.cosmosdb.version>
-        <spring.data.gremlin.version>2.1.2</spring.data.gremlin.version>
+        <spring.data.cosmosdb.version>2.1.7</spring.data.cosmosdb.version>
+        <spring.data.gremlin.version>2.1.7</spring.data.gremlin.version>
         <micrometer.core.version>1.1.1</micrometer.core.version>
     </properties>
 
@@ -129,8 +129,8 @@
             <!-- Azure CosmsoDB (Async) -->
             <dependency>
                 <groupId>com.microsoft.azure</groupId>
-                <artifactId>azure-cosmosdb</artifactId>
-                <version>${azure.cosmosdb.version}</version>
+                <artifactId>azure-cosmos</artifactId>
+                <version>${azure.cosmos.version}</version>
             </dependency>
 
             <!-- Azure Keyvault -->
