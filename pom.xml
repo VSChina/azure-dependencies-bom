@@ -55,7 +55,7 @@
         <azure.media.version>0.9.8</azure.media.version>
         <azure.documentdb.version>1.16.2</azure.documentdb.version>
         <azure.cosmos.version>3.1.0</azure.cosmos.version>
-        <spring.data.cosmosdb.version>2.1.7</spring.data.cosmosdb.version>
+        <spring.data.cosmosdb.version>2.2.0.M1</spring.data.cosmosdb.version>
         <spring.data.gremlin.version>2.2.0.M1</spring.data.gremlin.version>
     </properties>
 
