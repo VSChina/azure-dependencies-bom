@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure</groupId>
     <artifactId>azure-dependencies-bom</artifactId>
-    <version>2.1.0.M6</version>
+    <version>2.1.0.M7</version>
     <packaging>pom</packaging>
 
     <name>Azure SDK dependencies BOM</name>
@@ -53,12 +53,10 @@
         <azure.documentdb.version>1.16.2</azure.documentdb.version>
         <azure.keyvault.version>1.0.0</azure.keyvault.version>
         <azure.media.version>0.9.8</azure.media.version>
-        <azure.client.authentication.version>1.6.1</azure.client.authentication.version>
+        <azure.client.authentication.version>1.6.10</azure.client.authentication.version>
         <azure.cosmos.version>3.1.0</azure.cosmos.version>
-        <azure.monitor.micrometer.registry.version>1.1.1</azure.monitor.micrometer.registry.version>
         <spring.data.cosmosdb.version>2.1.7</spring.data.cosmosdb.version>
         <spring.data.gremlin.version>2.1.7</spring.data.gremlin.version>
-        <micrometer.core.version>1.1.1</micrometer.core.version>
     </properties>
 
     <dependencyManagement>
@@ -166,20 +164,6 @@
                 <groupId>com.microsoft.azure</groupId>
                 <artifactId>azure-client-authentication</artifactId>
                 <version>${azure.client.authentication.version}</version>
-            </dependency>
-
-            <!-- Azure Monitor Micrometer Registry -->
-            <dependency>
-                <groupId>io.micrometer</groupId>
-                <artifactId>micrometer-registry-azure-monitor</artifactId>
-                <version>${azure.monitor.micrometer.registry.version}</version>
-            </dependency>
-
-            <!-- Micrometer Core -->
-            <dependency>
-                <groupId>io.micrometer</groupId>
-                <artifactId>micrometer-core</artifactId>
-                <version>${micrometer.core.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
