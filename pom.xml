@@ -51,7 +51,8 @@
         <azure.storage.version>5.5.0</azure.storage.version>
         <azure.storage.blob.version>10.5.0</azure.storage.blob.version>
         <azure.documentdb.version>1.16.2</azure.documentdb.version>
-        <azure.keyvault.version>1.0.0</azure.keyvault.version>
+        <azure.keyvault.version>4.1.0</azure.keyvault.version>
+        <azure.identity.version>1.0.2</azure.identity.version>
         <azure.media.version>0.9.8</azure.media.version>
         <azure.client.authentication.version>1.6.10</azure.client.authentication.version>
         <azure.cosmos.version>3.1.0</azure.cosmos.version>
@@ -133,9 +134,14 @@
 
             <!-- Azure Keyvault -->
             <dependency>
-                <groupId>com.microsoft.azure</groupId>
-                <artifactId>azure-keyvault</artifactId>
+                <groupId>com.azure</groupId>
+                <artifactId>azure-security-keyvault-secrets</artifactId>
                 <version>${azure.keyvault.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.azure</groupId>
+                <artifactId>azure-identity</artifactId>
+                <version>${azure.identity.version}</version>
             </dependency>
 
             <!-- Azure Media -->
