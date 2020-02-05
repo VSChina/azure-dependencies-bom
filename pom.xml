@@ -69,7 +69,7 @@
                 <version>${azure.sdk.version}</version>
             </dependency>
 
-            <!-- Azure Adal4j -->
+            <!-- Azure Msal4j -->
             <dependency>
                 <groupId>com.microsoft.azure</groupId>
                 <artifactId>msal4j</artifactId>
