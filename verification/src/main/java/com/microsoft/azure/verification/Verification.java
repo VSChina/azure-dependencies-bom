@@ -5,6 +5,8 @@
  */
 package com.microsoft.azure.verification;
 
+import com.azure.data.cosmos.ConnectionPolicy;
+import com.azure.data.cosmos.ConsistencyLevel;
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.ClientCredential;
@@ -12,12 +14,6 @@ import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.AzureResponseBuilder;
 import com.microsoft.azure.credentials.AppServiceMSICredentials;
-import com.microsoft.azure.documentdb.ConnectionPolicy;
-import com.microsoft.azure.documentdb.ConsistencyLevel;
-import com.microsoft.azure.documentdb.DocumentClient;
-import com.microsoft.azure.eventhubs.ConnectionStringBuilder;
-import com.microsoft.azure.eventhubs.EventHubClient;
-import com.microsoft.azure.eventhubs.EventHubException;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.keyvault.authentication.KeyVaultCredentials;
 import com.microsoft.azure.management.Azure;
@@ -26,12 +22,12 @@ import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.serializer.AzureJacksonAdapter;
 import com.microsoft.azure.servicebus.QueueClient;
 import com.microsoft.azure.servicebus.ReceiveMode;
+import com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder;
 import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
-import com.microsoft.azure.verification.cosmosdb.repository.UserRepository;
 import com.microsoft.rest.RestClient;
 import com.microsoft.rest.ServiceResponseBuilder;
 import com.microsoft.rest.credentials.ServiceClientCredentials;
@@ -59,9 +55,6 @@ import java.util.concurrent.Future;
 public class Verification {
     @Value("${azure.management.baseUrl}")
     private String managementBaseUrl;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Bean
     public Azure getAzure() throws IOException {
@@ -112,17 +105,6 @@ public class Verification {
     }
 
     @Bean
-    public EventHubClient getEventHubClient() throws IOException, EventHubException {
-        ConnectionStringBuilder builder = new ConnectionStringBuilder();
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-        builder.setNamespaceName("fake-namespace");
-        builder.setEventHubName("fake-eventhub-name");
-
-        return EventHubClient.createSync(builder.toString(), executorService);
-    }
-
-    @Bean
     public QueueClient getQueueClient() throws InterruptedException, ServiceBusException {
         com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder builder = new
                 com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder("fake-string", "fake-queue-name");
@@ -148,15 +130,6 @@ public class Verification {
         container.createIfNotExists();
 
         return container;
-    }
-
-    @Bean
-    public DocumentClient getDocumentClient() {
-        ConnectionPolicy policy = new ConnectionPolicy();
-
-        policy.setUserAgentSuffix("spring-on-getAzure");
-
-        return new DocumentClient("fake-uri", "fake-key", policy, ConsistencyLevel.Session);
     }
 
     @Bean

@@ -72,17 +72,7 @@
 
 		<dependency>
 			<groupId>com.microsoft.azure</groupId>
-			<artifactId>adal4j</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.microsoft.azure</groupId>
 			<artifactId>applicationinsights-core</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.microsoft.azure</groupId>
-			<artifactId>azure-eventhubs-eph</artifactId>
 		</dependency>
 
 		<dependency>
@@ -98,16 +88,6 @@
 		<dependency>
 			<groupId>com.microsoft.azure</groupId>
 			<artifactId>azure-storage-blob</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.microsoft.azure</groupId>
-			<artifactId>azure-documentdb</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.microsoft.azure</groupId>
-			<artifactId>azure-keyvault</artifactId>
 		</dependency>
 
         <dependency>
