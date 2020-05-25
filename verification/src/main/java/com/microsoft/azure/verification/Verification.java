@@ -5,6 +5,8 @@
  */
 package com.microsoft.azure.verification;
 
+import javax.security.auth.login.Configuration;
+
 import com.microsoft.aad.adal4j.AuthenticationContext;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.ClientCredential;
@@ -12,37 +14,21 @@ import com.microsoft.applicationinsights.TelemetryClient;
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.AzureResponseBuilder;
 import com.microsoft.azure.credentials.AppServiceMSICredentials;
-import com.microsoft.azure.documentdb.ConnectionPolicy;
-import com.microsoft.azure.documentdb.ConsistencyLevel;
-import com.microsoft.azure.documentdb.DocumentClient;
-import com.microsoft.azure.eventhubs.ConnectionStringBuilder;
-import com.microsoft.azure.eventhubs.EventHubClient;
-import com.microsoft.azure.eventhubs.EventHubException;
 import com.microsoft.azure.keyvault.KeyVaultClient;
 import com.microsoft.azure.keyvault.authentication.KeyVaultCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.keyvault.Vault;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.serializer.AzureJacksonAdapter;
-import com.microsoft.azure.servicebus.QueueClient;
-import com.microsoft.azure.servicebus.ReceiveMode;
-import com.microsoft.azure.servicebus.primitives.ServiceBusException;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
-import com.microsoft.azure.verification.cosmosdb.repository.UserRepository;
 import com.microsoft.rest.RestClient;
 import com.microsoft.rest.ServiceResponseBuilder;
 import com.microsoft.rest.credentials.ServiceClientCredentials;
 import com.microsoft.rest.serializer.JacksonAdapter;
-import com.microsoft.windowsazure.Configuration;
-import com.microsoft.windowsazure.services.media.MediaConfiguration;
-import com.microsoft.windowsazure.services.media.MediaContract;
-import com.microsoft.windowsazure.services.media.MediaService;
-import com.microsoft.windowsazure.services.media.authentication.*;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,9 +45,6 @@ import java.util.concurrent.Future;
 public class Verification {
     @Value("${azure.management.baseUrl}")
     private String managementBaseUrl;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Bean
     public Azure getAzure() throws IOException {
@@ -112,25 +95,6 @@ public class Verification {
     }
 
     @Bean
-    public EventHubClient getEventHubClient() throws IOException, EventHubException {
-        ConnectionStringBuilder builder = new ConnectionStringBuilder();
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-        builder.setNamespaceName("fake-namespace");
-        builder.setEventHubName("fake-eventhub-name");
-
-        return EventHubClient.createSync(builder.toString(), executorService);
-    }
-
-    @Bean
-    public QueueClient getQueueClient() throws InterruptedException, ServiceBusException {
-        com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder builder = new
-                com.microsoft.azure.servicebus.primitives.ConnectionStringBuilder("fake-string", "fake-queue-name");
-
-        return new QueueClient(builder, ReceiveMode.RECEIVEANDDELETE);
-    }
-
-    @Bean
     public RestClient getRestClient() {
         return new RestClient.Builder()
                 .withBaseUrl("http://localhost")
@@ -151,15 +115,6 @@ public class Verification {
     }
 
     @Bean
-    public DocumentClient getDocumentClient() {
-        ConnectionPolicy policy = new ConnectionPolicy();
-
-        policy.setUserAgentSuffix("spring-on-getAzure");
-
-        return new DocumentClient("fake-uri", "fake-key", policy, ConsistencyLevel.Session);
-    }
-
-    @Bean
     public Vault getVault() throws IOException {
         return this.getAzure().vaults().define("fake-name")
                 .withRegion(Region.US_WEST)
@@ -170,21 +125,6 @@ public class Verification {
                 .allowSecretAllPermissions()
                 .attach()
                 .create();
-    }
-
-    @Bean
-    public MediaContract createMediaContract() throws MalformedURLException {
-        final AzureAdTokenCredentials tokenCredentials = new AzureAdTokenCredentials("fake-tenant",
-                new AzureAdClientSymmetricKey("fake-client-id", "fake-client-key"),
-                AzureEnvironments.AZURE_CLOUD_ENVIRONMENT);
-        final ExecutorService executorService = Executors.newFixedThreadPool(1);
-        final TokenProvider tokenProvider = new AzureAdTokenProvider(tokenCredentials, executorService);
-        final Configuration configuration = Configuration.getInstance();
-
-        configuration.setProperty(MediaConfiguration.AZURE_AD_API_SERVER, "http://fake.account.api.url");
-        configuration.setProperty(MediaConfiguration.AZURE_AD_TOKEN_PROVIDER, tokenProvider);
-
-        return MediaService.create(configuration);
     }
 
     @Bean

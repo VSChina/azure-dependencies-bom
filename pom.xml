@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure</groupId>
     <artifactId>azure-dependencies-bom</artifactId>
-    <version>2.2.0.M6</version>
+    <version>2.3.0</version>
     <packaging>pom</packaging>
 
     <name>Azure SDK dependencies BOM</name>
@@ -47,17 +47,13 @@
         <azure.applicationinsights.version>2.5.0</azure.applicationinsights.version>
         <azure.eventhubs.version>5.0.2</azure.eventhubs.version>
         <azure.eventhubs.checkpoint.store.version>1.0.2</azure.eventhubs.checkpoint.store.version>
-        <azure.servicebus.version>1.2.15</azure.servicebus.version>
         <azure.client.runtime.version>1.6.13</azure.client.runtime.version>
         <azure.client.authentication.version>1.6.13</azure.client.authentication.version>
-        <azure.storage.version>8.4.0</azure.storage.version>
-        <azure.storage.blob.version>10.5.0</azure.storage.blob.version>
         <azure.keyvault.version>4.1.1</azure.keyvault.version>
         <azure.identity.version>1.0.4</azure.identity.version>
-        <azure.media.version>0.9.8</azure.media.version>
-        <azure.cosmos.version>3.7.1</azure.cosmos.version>
-        <spring.data.cosmosdb.version>2.2.3.FIX1</spring.data.cosmosdb.version>
-        <spring.data.gremlin.version>2.2.3</spring.data.gremlin.version>
+        <azure.cosmos.version>3.7.3</azure.cosmos.version>
+        <spring.data.cosmosdb.version>2.3.0</spring.data.cosmosdb.version>
+        <spring.data.gremlin.version>2.3.0</spring.data.gremlin.version>
     </properties>
 
     <dependencyManagement>
@@ -97,32 +93,11 @@
                 <version>${azure.eventhubs.checkpoint.store.version}</version>
             </dependency>
 
-            <!-- Azure ServiceBus -->
-            <dependency>
-                <groupId>com.microsoft.azure</groupId>
-                <artifactId>azure-servicebus</artifactId>
-                <version>${azure.servicebus.version}</version>
-            </dependency>
-
             <!-- Azure Client Runtime -->
             <dependency>
                 <groupId>com.microsoft.rest</groupId>
                 <artifactId>client-runtime</artifactId>
                 <version>${azure.client.runtime.version}</version>
-            </dependency>
-
-            <!-- Azure Storage -->
-            <dependency>
-                <groupId>com.microsoft.azure</groupId>
-                <artifactId>azure-storage</artifactId>
-                <version>${azure.storage.version}</version>
-            </dependency>
-
-            <!-- Azure Storage Reactive -->
-            <dependency>
-                <groupId>com.microsoft.azure</groupId>
-                <artifactId>azure-storage-blob</artifactId>
-                <version>${azure.storage.blob.version}</version>
             </dependency>
 
             <!-- Azure CosmsoDB (Async) -->
@@ -142,13 +117,6 @@
                 <groupId>com.azure</groupId>
                 <artifactId>azure-identity</artifactId>
                 <version>${azure.identity.version}</version>
-            </dependency>
-
-            <!-- Azure Media -->
-            <dependency>
-                <groupId>com.microsoft.azure</groupId>
-                <artifactId>azure-media</artifactId>
-                <version>${azure.media.version}</version>
             </dependency>
 
             <!-- Spring Data Cosmosdb -->
