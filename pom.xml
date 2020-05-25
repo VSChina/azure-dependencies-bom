@@ -52,8 +52,8 @@
         <azure.keyvault.version>4.1.1</azure.keyvault.version>
         <azure.identity.version>1.0.4</azure.identity.version>
         <azure.cosmos.version>3.7.3</azure.cosmos.version>
-        <spring.data.cosmosdb.version>2.3.1-SNAPSHOT</spring.data.cosmosdb.version>
-        <spring.data.gremlin.version>2.3.1-SNAPSHOT</spring.data.gremlin.version>
+        <spring.data.cosmosdb.version>2.3.0</spring.data.cosmosdb.version>
+        <spring.data.gremlin.version>2.3.0</spring.data.gremlin.version>
     </properties>
 
     <dependencyManagement>
